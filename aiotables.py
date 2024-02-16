@@ -29,30 +29,31 @@ async def append_user(id: str, username: str, team_name):
             await sheet.update_cell(cell.row, 3, team_name)
 
 
-green = {'red': 0.44, 'green': 1, 'blue': 0.79}
-yellow = {'red': 1, 'green': 1, 'blue': 0.67}
-
-async def mark_cell(id, level, value):
-    sheet = await get_sheet()
-    cell = await sheet.find(str(id))
-    if cell is None:
-        return
-    row_number = cell.row
-    if value == 'д':
-         color = green
-    else:
-         color = yellow
-    # await sheet.update_cell(row_number, level + 3, value)
-
-    range = f'{chr(level + 67)}{row_number}:{chr(level + 67)}{row_number}'
-    format = {'backgroundColor': color}
-
-    await sheet.format(range, format)
-
 async def get_ids():
     sheet = await get_sheet()
     res = await sheet.col_values(1) 
     return res
+
+
+async def get_all_scores():
+    sheet = await get_sheet()
+    column_values = await sheet.col_values(8)
+    team_names = await sheet.col_values(1)
+    return team_names[1:7], column_values[1:7]
+
+
+async def get_score(name):
+    sheet = await get_sheet()
+    if name in ['1', '2', '3', '4', '5', '6']:
+        row_number = int(name) + 1
+    else:
+        cell = await sheet.find(name)
+        if cell is None:
+            return None, None
+        row_number = cell.row
+    rooms_names = await sheet.row_values(1)
+    values_in_row = await sheet.row_values(row_number)
+    return values_in_row, rooms_names[1:8]
 
 async def update_cell(id, cell_num, value):
     sheet = await get_sheet()
